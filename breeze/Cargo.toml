@@ -10,4 +10,6 @@ edition = "2021"
 [dependencies]
 pest = "2.7"
 pest_derive = "2.7"
-fxhash = "0.2"
+rustc-hash = "1.1"
+thiserror = "1.0"
+anyhow = "1.0"

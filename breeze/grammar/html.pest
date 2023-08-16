@@ -39,6 +39,6 @@ node = { void_tag | full_tag | text_node }
 tree = { node* }
 tree_toplevel = _{ PUSH("") ~ tree ~ POP }
 
-preamble = { ("<" ~ "!" ~ ^"DOCTYPE" ~ ^"html" ~ ">")? }
+preamble = { ("<" ~ "!" ~ ^"DOCTYPE" ~ ^"html" ~ ">") }
 
-dom = { SOI ~ preamble ~ tree_toplevel ~ EOI }
+dom = { SOI ~ preamble* ~ tree_toplevel ~ EOI }

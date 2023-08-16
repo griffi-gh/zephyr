@@ -20,7 +20,7 @@ text_node = @{ (!match_tag ~ ANY)+ ~ text_node? } //is recursion neeeded?
 //raw_text_node = @{ (!("<" ~ "/" ~ PEEK ~ attributes ~ "/"? ~ ">") ~ ANY)* }
 
 // Nodes which do not require closing tags
-void_tag_name = _{
+void_tag_name = {
   ^"area" | ^"base" | ^"br" | ^"col" | ^"command" |
   ^"embed" | ^"hr" | ^"img" | ^"input" | ^"keygen" |
   ^"link" | ^"meta" | ^"param" | ^"source" | ^"track" | ^"wbr"

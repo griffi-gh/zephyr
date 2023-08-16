@@ -5,7 +5,7 @@ use pest::{Parser, iterators::Pair, error::Error as PestError};
 use thiserror::Error;
 
 #[derive(Error, Debug)]
-pub enum HtmlError {
+pub enum DomParseError {
   #[error("failed to parse html")]
   ParseError(#[from] PestError<HtmlRule>),
 }
@@ -142,7 +142,7 @@ pub struct Dom {
 
 impl Dom {
   //This function should never panic if the implementation is correct!
-  pub fn parse(html: &str) -> Result<Self, HtmlError> {
+  pub fn parse(html: &str) -> Result<Self, DomParseError> {
     fn parse_tree(parent_node: &SharedNode, tree_thingy: Pair<HtmlRule>) {
       assert_eq!(tree_thingy.as_rule(), HtmlRule::tree);
       for node_thingy in tree_thingy.into_inner() {

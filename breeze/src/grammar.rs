@@ -9,3 +9,4 @@ macro_rules! define {
 }
 
 define!(html, "../grammar/html.pest");
+define!(css,  "../grammar/css.pest");

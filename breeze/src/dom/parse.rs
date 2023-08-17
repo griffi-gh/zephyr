@@ -1,14 +1,8 @@
+use crate::grammar::html::{Parser as HtmlParser, Rule as HtmlRule};
 use super::{Dom, Node, ElementNode, TextNode, SharedNode, SharedClone};
 use rustc_hash::FxHashMap;
 use pest::{Parser, iterators::Pair, error::Error as PestError};
 use thiserror::Error;
-
-mod html_parser {
-  #[derive(pest_derive::Parser)]
-  #[grammar = "../grammar/html.pest"]
-  pub struct HtmlParser;
-}
-use html_parser::{HtmlParser, Rule as HtmlRule};
 
 #[derive(Error, Debug)]
 pub enum DomParseError {
@@ -87,10 +81,7 @@ impl Dom {
             };
             
             //Create and insert new node
-            let new_node: SharedNode = Node::Element(ElementNode {
-              tag_name, attributes,
-              ..Default::default()
-            }).into();
+            let new_node: SharedNode = Node::Element(ElementNode::new_with_tag_and_attributes(tag_name, attributes)).into();
             println!("NODE {:?}", new_node);
             parent_node.push(new_node.shared_clone()).unwrap();
 

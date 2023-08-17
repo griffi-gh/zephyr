@@ -38,6 +38,7 @@ version = "0.0.0"
 dependencies = [
  "anyhow",
  "nalgebra",
+ "partialdebug",
  "pest",
  "pest_derive",
  "rustc-hash",
@@ -182,6 +183,26 @@ name = "once_cell"
 version = "1.18.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "dd8b5dd2ae5ed71462c540258bedcb51965123ad7e7ccf4b9a8cafaa4a63576d"
+
+[[package]]
+name = "partialdebug"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "589e1f540d19ee0565c1e05f6737b442d8d71e477c197acf368ddd89914dd1e8"
+dependencies = [
+ "partialdebug-derive",
+]
+
+[[package]]
+name = "partialdebug-derive"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "dc64c42a1af5b98ba812b0b8ec10ff222b44fec0cc9637246fe231915a2d31bc"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 1.0.109",
+]
 
 [[package]]
 name = "paste"

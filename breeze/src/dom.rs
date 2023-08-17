@@ -1,68 +1,139 @@
+use std::fmt::Debug;
+use partialdebug::placeholder::PartialDebug;
 use rustc_hash::{FxHashMap, FxHashSet};
-use thiserror::Error;
 
-mod parse;
 mod shared;
+mod errors;
+mod parse;
+
 pub use shared::{SharedNode, WeakNode, SharedClone};
+pub use errors::DomPushError;
 
-#[derive(Error, Debug)]
-pub enum DomPushError {
-  #[error("text nodes can't have children")]
-  NodeInfertile,
-
-  #[error("node already has parent")]
-  AlreadyHasParent,
+pub trait InnerHtml {
+  fn inner_html(&self) -> String;
 }
 
+pub trait ElementInterface {}
+
+/// Do not change values in this struct directly
 #[derive(Debug, Default)]
-pub struct ElementNodeQueryCache {
+pub struct ElementNodeCache {
   pub id: Option<String>,
   pub classes: FxHashSet<String>
 }
 
-#[derive(Debug, Default)]
+#[derive(Default, PartialDebug)]
 pub struct ElementNode {
+  pub element: Option<Box<dyn ElementInterface>>,
   pub tag_name: String,
   pub attributes: FxHashMap<String, String>,
-  pub query_cache: ElementNodeQueryCache,
+  pub cache: ElementNodeCache,
   pub children: Vec<SharedNode>,
   pub parent: Option<WeakNode>,
 }
 
 impl ElementNode {
+  pub fn new() -> Self {
+    Self::default()
+  }
+
+  pub fn new_with_tag(tag: String) -> Self {
+    let mut this = Self::new();
+    this.set_tag(tag);
+    this
+  }
+
+  pub fn new_with_tag_and_attributes(tag: String, attributes: FxHashMap<String, String>) -> Self {
+    let mut this = Self::new();
+    this.set_tag(tag);
+    //XXX: should process_attribute_change be called after setting this.attributes? (requires clone)
+    for (k, v) in &attributes {
+      this.process_attribute_change(k, Some(v), None);
+    }
+    this.attributes = attributes;
+    this
+  }
+
+  pub fn set_tag(&mut self, tag: String) {
+    //TODO add some stuff here?
+    #[allow(clippy::match_single_binding)] {
+    self.element = match tag.as_str() {
+      _ => None
+    };}
+    self.tag_name = tag;
+  }
+
   pub fn attribute(&self, name: &str) -> Option<&str> {
     self.attributes.get(name.to_lowercase().as_str()).map(|x| x.as_str())
   }
 
   pub fn id(&self) -> Option<&str> {
-    self.query_cache.id.as_deref()
+    self.cache.id.as_deref()
   }
 
   pub fn classes(&self) -> &FxHashSet<String> {
-    &self.query_cache.classes
+    &self.cache.classes
   }
 
-  //TODO: remove useless clones in set_attribute/process_attribute_change
+  
+  //THIS IS TERRIBLY SLOW!
+  //TODO: fix and optimize set_attribute_list,
+  // pub fn set_attribute_list(&mut self, mut attributes: FxHashMap<String, String>) {
+  //   swap(&mut self.attributes, &mut attributes);
+  //   // XXX: Maybe (collect*2 + union) is faster then (collect + extend)?
+  //   let mut keys = attributes.keys().cloned().collect::<FxHashSet<_>>();
+  //   keys.extend(self.attributes.keys().cloned());
+  //   for key in keys {
+  //     let old_value = attributes.get(&key).map(|x| x.as_str());
+  //     let new_value = self.attributes.get(&key).map(|x| x.as_str());
+  //     self.process_attribute_change(&key, new_value, old_value);
+  //   }
+  // }
+    
+  //TODO: remove needless clones in set_attribute/process_attribute_change, maybe clean up?
 
-  pub fn set_attribute(&mut self, key: String, value: String) {
-    let prev = self.attributes.insert(key.clone(), value.clone());
-    self.process_attribute_change(&key, &value, prev.as_deref());
-  }
-
-  fn process_attribute_change(&mut self, key: &str, to: &str, from: Option<&str>) {
-    if let Some(prev) = from {
-      if prev == to { return }
+  pub fn set_attribute(&mut self, key: &str, value: Option<String>) {
+    let lc_key = key.to_ascii_lowercase();
+    if let Some(value) = value {
+      let prev = self.attributes.insert(lc_key.clone(), value.clone());
+      self.process_attribute_change(&lc_key, Some(&value), prev.as_deref());
+    } else {
+      let prev = self.attributes.remove(&lc_key);
+      self.process_attribute_change(&lc_key, None, prev.as_deref());
     }
-    match key.to_ascii_lowercase().as_str() {
+  }
+
+  fn process_attribute_change(&mut self, key: &str, to: Option<&str>, prev: Option<&str>) {
+    if prev == to { return }
+    match key {
       "class" => {
-        self.query_cache.classes.clear();
-        self.query_cache.classes.extend(to.trim().split(' ').map(|x| x.to_ascii_lowercase()));
+        self.cache.classes.clear();
+        if let Some(to) = to {
+          self.cache.classes.extend(to.trim().split(' ').map(|x| x.to_ascii_lowercase()));
+        }
       },
       "id" => {
-        self.query_cache.id = to.is_empty().then(|| to.trim().to_string());
+        self.cache.id = to.and_then(|to| (!to.trim().is_empty()).then(|| to.trim().to_string()));
       },
       _ => ()
     }
+  }
+}
+
+impl InnerHtml for ElementNode {
+  fn inner_html(&self) -> String {
+    format!(
+      "<{}{}{}>{}{}{}{}",
+      self.tag_name,
+      self.attributes.iter().map(|(k, v)| {
+        format!(" {}=\"{}\"", k, v.replace('\\', "\\\\").replace('"', "\\\""))
+      }).collect::<String>(),
+      if self.children.is_empty() { "/" } else { "" },
+      self.children.iter().map(|x| x.0.borrow().inner_html()).collect::<String>(),
+      if self.children.is_empty() { "" } else { "</" },
+      if self.children.is_empty() { "" } else { self.tag_name.as_str() },
+      if self.children.is_empty() { "" } else { ">" },
+    )
   }
 }
 
@@ -70,6 +141,13 @@ impl ElementNode {
 pub struct TextNode {
   pub text: String,
   pub parent: Option<WeakNode>,
+}
+
+impl InnerHtml for TextNode {
+  fn inner_html(&self) -> String {
+    //TODO: this can lead tho xss:
+    self.text.clone()
+  }
 }
 
 // NOTE: Implementing Clone for Node may cause issues with Deref?
@@ -95,6 +173,14 @@ impl Node {
   }
 }
 
+impl InnerHtml for Node {
+  fn inner_html(&self) -> String {
+    match self {
+      Node::Element(element) => element.inner_html(),
+      Node::Text(text) => text.inner_html(),
+    }
+  }
+}
 
 impl SharedNode {
   pub fn root() -> Self {

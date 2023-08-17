@@ -72,5 +72,4 @@ pub fn _1() {
     </html>
   "#;
   let dom = Dom::parse(motherfucking_website).unwrap();
-  println!("{:#?}", dom);
 }

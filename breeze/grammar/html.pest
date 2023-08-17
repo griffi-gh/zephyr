@@ -5,7 +5,6 @@ char = _{ ASCII_ALPHANUMERIC | "_" | "-" }
 
 ident = @{ char+ }
 _tag_end = !{ "/"? ~ ">" }
-//TODO escape seq
 value_proper = @{ PUSH("\"" | "\'") ~ (("\\" ~ ANY) | (!PEEK ~ ANY))* ~ POP }
 value_naked = @{ (!(WHITE_SPACE | _tag_end) ~ ANY)+ }
 value = _{ value_proper | value_naked }

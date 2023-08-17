@@ -191,9 +191,12 @@ impl Dom {
                   let attribute_value: String = if let Some(str_pair) = attribute_inner.next() {
                     match str_pair.as_rule() {
                       HtmlRule::value_proper => {
-                        let mut as_str = &str_pair.as_str()[1..];
+                        let &(chr, mut as_str) = &str_pair.as_str().split_at(1);
                         as_str = &as_str[..(as_str.len() - 1)];
-                        as_str.replace("\\\\", "\\")
+                        as_str.replace("\\\\", "\\").replace(
+                          if chr == "\"" { "\\\"" } else if chr == "'" { "\\'" } else { unreachable!() },
+                          if chr == "\"" { "\"" } else if chr == "'" { "'" } else { unreachable!() },
+                        )
                       },
                       HtmlRule::value_naked => str_pair.as_str().into(),
                       _ => unreachable!()

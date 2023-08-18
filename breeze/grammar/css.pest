@@ -49,8 +49,6 @@ color = _{ color_named | color_hex | color_rgb }
   color_hex = @{ "#" ~ (ASCII_HEX_DIGIT{3} | ASCII_HEX_DIGIT{4} | ASCII_HEX_DIGIT{6} | ASCII_HEX_DIGIT{8}) }
   color_rgb = { (^"rgb" | ^"rgba") ~ "(" ~ integer ~ ","? ~ integer ~ ","? ~ integer ~ ("/" ~ alpha_value)? ~ ")" }
 
-
-
 //https://developer.mozilla.org/en-US/docs/Web/CSS/length
 length = @{ number ~ length_unit }
   length_unit = { ^"px" } //TODO add others
@@ -59,5 +57,16 @@ length = @{ number ~ length_unit }
 
 // unit_number = @{ number ~ unit? }
 //   unit = { ^"px" }
+
+selector = { selector_part+ }
+  selector_part = @{ (selector_id | selector_class | selector_pseudo_fn | selector_pseudo | selector_element)+ }
+    selector_element = @{ ident }
+    selector_id = @{ "#" ~ ident }
+    selector_class = @{ "." ~ ident }
+    selector_pseudo = @{ (":" | "::") ~ ident }
+    selector_pseudo_fn = @{ ":" ~ ident ~ selector_pseudo_fn_body}
+      selector_pseudo_fn_body = !{ "(" ~ selector ~ ")" }
+
+//TODO selector_attribute
 
 file = { SOI ~ EOI }

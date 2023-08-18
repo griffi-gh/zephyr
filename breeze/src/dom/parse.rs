@@ -1,6 +1,5 @@
 use super::{Dom, Node, ElementNode, TextNode, SharedNode, SharedClone};
 use rustc_hash::FxHashMap;
-use pest::{Parser, iterators::Pair, error::Error as PestError};
 use thiserror::Error;
 
 #[derive(Error, Debug)]

@@ -4,10 +4,10 @@ COMMENT = _{ "/*" ~ (!"*/" ~ ANY)* ~ "*/" }
 absolute_size = { ^"xx-small" | ^"x-small" | ^"small" | ^"medium" | ^"large" | ^"x-large" | ^"xx-large" | ^"xxx-large" }
 
 //https://developer.mozilla.org/en-US/docs/Web/CSS/number
-number = @{ ("-"| "+") ~ ((ASCII_DIGIT* ~ "." ~ ASCII_DIGIT+) | (ASCII_DIGIT+)) }
+number = @{ ("-"| "+")? ~ ((ASCII_DIGIT* ~ "." ~ ASCII_DIGIT+) | (ASCII_DIGIT+)) }
 
 //https://developer.mozilla.org/en-US/docs/Web/CSS/integer
-integer = @{ ("-"| "+") ~ ASCII_DIGIT+ }
+integer = @{ ("-"| "+")? ~ ASCII_DIGIT+ }
 
 //https://developer.mozilla.org/en-US/docs/Web/CSS/ident
 ident = @{ schar ~ char* }
@@ -59,14 +59,18 @@ length = @{ number ~ length_unit }
 //   unit = { ^"px" }
 
 selector = { selector_part+ }
-  selector_part = @{ (selector_id | selector_class | selector_pseudo_fn | selector_pseudo | selector_element)+ }
+  selector_part = ${ (selector_id | selector_class | selector_pseudo_fn | selector_pseudo | selector_element)+ }
     selector_element = @{ ident }
     selector_id = @{ "#" ~ ident }
     selector_class = @{ "." ~ ident }
-    selector_pseudo = @{ (":" | "::") ~ ident }
+    selector_pseudo = @{ ("::" | ":") ~ ident }
     selector_pseudo_fn = @{ ":" ~ ident ~ selector_pseudo_fn_body}
       selector_pseudo_fn_body = !{ "(" ~ selector ~ ")" }
+  //TODO selector_attribute
 
-//TODO selector_attribute
+rule = { ident ~ ":" ~ color}
 
-file = { SOI ~ EOI }
+rules = { (rule ~ ";")* ~ rule? }
+block = { selector ~ "{" ~ rules ~ "}" }
+
+file = { SOI ~ block* ~ EOI }

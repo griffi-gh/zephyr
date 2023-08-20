@@ -58,7 +58,7 @@ length = @{ number ~ length_unit }
 // unit_number = @{ number ~ unit? }
 //   unit = { ^"px" }
 
-selector = { selector_part+ }
+selector_direct = { selector_part+ }
   selector_part = ${ (selector_id | selector_class | selector_pseudo_fn | selector_pseudo | selector_element)+ }
     selector_element = @{ ident }
     selector_id = @{ "#" ~ ident }

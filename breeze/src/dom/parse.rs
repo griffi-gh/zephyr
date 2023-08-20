@@ -14,9 +14,9 @@ impl Dom {
   //This function should never panic if the implementation is correct!
   pub fn parse(html: &str) -> Result<Self, DomParseError> {
     fn parse_tree(parent_node: &SharedNode, tree_thingy: Pair<HtmlRule>) {
-      assert_eq!(tree_thingy.as_rule(), HtmlRule::tree);
+      debug_assert_eq!(tree_thingy.as_rule(), HtmlRule::tree);
       for node_thingy in tree_thingy.into_inner() {
-        assert_eq!(node_thingy.as_rule(), HtmlRule::node);
+        debug_assert_eq!(node_thingy.as_rule(), HtmlRule::node);
         let node_subtype = node_thingy.into_inner().next().unwrap();
         let node_subtype_rule = node_subtype.as_rule();
 
@@ -33,7 +33,7 @@ impl Dom {
                 HtmlRule::opening_tag => {
                   let mut opening_tag_inner = opening_tag_or_ident.into_inner();
                   let tag_name_pair = opening_tag_inner.next().unwrap();
-                  assert_eq!(tag_name_pair.as_rule(), HtmlRule::ident);
+                  debug_assert_eq!(tag_name_pair.as_rule(), HtmlRule::ident);
                   let tag_name = tag_name_pair.as_str().into();
                   let attributes_pair = opening_tag_inner.next();
                   (attributes_pair, tag_name)
@@ -50,11 +50,11 @@ impl Dom {
               let mut attributes = FxHashMap::default();
               if let Some(attributes_pairs) = attributes_pairs {
                 for attribute_pair in attributes_pairs.into_inner() {
-                  assert_eq!(attribute_pair.as_rule(), HtmlRule::attribute);
+                  debug_assert_eq!(attribute_pair.as_rule(), HtmlRule::attribute);
                   let mut attribute_inner = attribute_pair.into_inner();
 
                   let attribute_ident = attribute_inner.next().unwrap();
-                  assert_eq!(attribute_ident.as_rule(), HtmlRule::ident);
+                  debug_assert_eq!(attribute_ident.as_rule(), HtmlRule::ident);
                   let attribute_name = attribute_ident.as_str().to_owned();
 
                   let attribute_value: String = if let Some(str_pair) = attribute_inner.next() {
@@ -88,12 +88,12 @@ impl Dom {
             //If full tag, recursively parse children
             if node_subtype_rule == HtmlRule::full_tag {
               let ptree = node_subtype_inner.next().unwrap();
-              assert!(ptree.as_rule() == HtmlRule::tree);
+              debug_assert_eq!(ptree.as_rule(), HtmlRule::tree);
               parse_tree(&new_node, ptree);
 
               // ensure correctness of the parsed tree?
-              // let closing_tag = node_subtype_inner.next().unwrap();
-              // assert!(closing_tag.as_rule() == HtmlRule::closing_tag);
+              let closing_tag = node_subtype_inner.next().unwrap();
+              debug_assert_eq!(closing_tag.as_rule(), HtmlRule::closing_tag);
             }
           },
           //Text nodes

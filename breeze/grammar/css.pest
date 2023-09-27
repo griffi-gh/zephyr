@@ -1,76 +1,76 @@
-WHITESPACE = _{ WHITE_SPACE+ }
-COMMENT = _{ "/*" ~ (!"*/" ~ ANY)* ~ "*/" }
+// WHITESPACE = _{ WHITE_SPACE+ }
+// COMMENT = _{ "/*" ~ (!"*/" ~ ANY)* ~ "*/" }
 
-absolute_size = { ^"xx-small" | ^"x-small" | ^"small" | ^"medium" | ^"large" | ^"x-large" | ^"xx-large" | ^"xxx-large" }
+// absolute_size = { ^"xx-small" | ^"x-small" | ^"small" | ^"medium" | ^"large" | ^"x-large" | ^"xx-large" | ^"xxx-large" }
 
-//https://developer.mozilla.org/en-US/docs/Web/CSS/number
-number = @{ ("-"| "+")? ~ ((ASCII_DIGIT* ~ "." ~ ASCII_DIGIT+) | (ASCII_DIGIT+)) }
+// //https://developer.mozilla.org/en-US/docs/Web/CSS/number
+// number = @{ ("-"| "+")? ~ ((ASCII_DIGIT* ~ "." ~ ASCII_DIGIT+) | (ASCII_DIGIT+)) }
 
-//https://developer.mozilla.org/en-US/docs/Web/CSS/integer
-integer = @{ ("-"| "+")? ~ ASCII_DIGIT+ }
+// //https://developer.mozilla.org/en-US/docs/Web/CSS/integer
+// integer = @{ ("-"| "+")? ~ ASCII_DIGIT+ }
 
-//https://developer.mozilla.org/en-US/docs/Web/CSS/ident
-ident = @{ schar ~ char* }
-  schar = _{ ASCII_ALPHA | "_" | "-" }
-  char = _{ ASCII_ALPHANUMERIC | "_" | "-" }
+// //https://developer.mozilla.org/en-US/docs/Web/CSS/ident
+// ident = @{ schar ~ char* }
+//   schar = _{ ASCII_ALPHA | "_" | "-" }
+//   char = _{ ASCII_ALPHANUMERIC | "_" | "-" }
 
-//https://developer.mozilla.org/en-US/docs/Web/CSS/angle
-angle = @{ number ~ angle_unit }
-angle_unit = { ^"deg" | ^"grad" | ^"rad" | ^"turn" }
+// //https://developer.mozilla.org/en-US/docs/Web/CSS/angle
+// angle = @{ number ~ angle_unit }
+// angle_unit = { ^"deg" | ^"grad" | ^"rad" | ^"turn" }
 
-//https://developer.mozilla.org/en-US/docs/Web/CSS/percentage
-percentage = @{ number ~ "%" }
+// //https://developer.mozilla.org/en-US/docs/Web/CSS/percentage
+// percentage = @{ number ~ "%" }
 
-//https://developer.mozilla.org/en-US/docs/Web/CSS/alpha_value
-alpha_value = { number | percentage }
+// //https://developer.mozilla.org/en-US/docs/Web/CSS/alpha_value
+// alpha_value = { number | percentage }
 
-//https://developer.mozilla.org/en-US/docs/Web/CSS/color
-color = _{ color_named | color_hex | color_rgb }
-  //current_color = {...}
-  color_named = {
-    ^"transparent"
-    | ^"black"
-    | ^"silver"
-    | ^"gray"
-    | ^"white"
-    | ^"maroon"
-    | ^"red"
-    | ^"purple"
-    | ^"fuchsia"
-    | ^"green"
-    | ^"lime"
-    | ^"olive"
-    | ^"yellow"
-    | ^"navy"
-    | ^"blue"
-    | ^"teal"
-    | ^"aqua"
-  }
-  color_hex = @{ "#" ~ (ASCII_HEX_DIGIT{3} | ASCII_HEX_DIGIT{4} | ASCII_HEX_DIGIT{6} | ASCII_HEX_DIGIT{8}) }
-  color_rgb = { (^"rgb" | ^"rgba") ~ "(" ~ integer ~ ","? ~ integer ~ ","? ~ integer ~ ("/" ~ alpha_value)? ~ ")" }
+// //https://developer.mozilla.org/en-US/docs/Web/CSS/color
+// color = _{ color_named | color_hex | color_rgb }
+//   //current_color = {...}
+//   color_named = {
+//     ^"transparent"
+//     | ^"black"
+//     | ^"silver"
+//     | ^"gray"
+//     | ^"white"
+//     | ^"maroon"
+//     | ^"red"
+//     | ^"purple"
+//     | ^"fuchsia"
+//     | ^"green"
+//     | ^"lime"
+//     | ^"olive"
+//     | ^"yellow"
+//     | ^"navy"
+//     | ^"blue"
+//     | ^"teal"
+//     | ^"aqua"
+//   }
+//   color_hex = @{ "#" ~ (ASCII_HEX_DIGIT{3} | ASCII_HEX_DIGIT{4} | ASCII_HEX_DIGIT{6} | ASCII_HEX_DIGIT{8}) }
+//   color_rgb = { (^"rgb" | ^"rgba") ~ "(" ~ integer ~ ","? ~ integer ~ ","? ~ integer ~ ("/" ~ alpha_value)? ~ ")" }
 
-//https://developer.mozilla.org/en-US/docs/Web/CSS/length
-length = @{ number ~ length_unit }
-  length_unit = { ^"px" } //TODO add others
+// //https://developer.mozilla.org/en-US/docs/Web/CSS/length
+// length = @{ number ~ length_unit }
+//   length_unit = { ^"px" } //TODO add others
 
-// angle_percentage = _{ angle | percentage }
+// // angle_percentage = _{ angle | percentage }
 
-// unit_number = @{ number ~ unit? }
-//   unit = { ^"px" }
+// // unit_number = @{ number ~ unit? }
+// //   unit = { ^"px" }
 
-selector_direct = { selector_part+ }
-  selector_part = ${ (selector_id | selector_class | selector_pseudo_fn | selector_pseudo | selector_element)+ }
-    selector_element = @{ ident }
-    selector_id = @{ "#" ~ ident }
-    selector_class = @{ "." ~ ident }
-    selector_pseudo = @{ ("::" | ":") ~ ident }
-    selector_pseudo_fn = @{ ":" ~ ident ~ selector_pseudo_fn_body}
-      selector_pseudo_fn_body = !{ "(" ~ selector ~ ")" }
-  //TODO selector_attribute
+// selector_direct = { selector_part+ }
+//   selector_part = ${ (selector_id | selector_class | selector_pseudo_fn | selector_pseudo | selector_element)+ }
+//     selector_element = @{ ident }
+//     selector_id = @{ "#" ~ ident }
+//     selector_class = @{ "." ~ ident }
+//     selector_pseudo = @{ ("::" | ":") ~ ident }
+//     selector_pseudo_fn = @{ ":" ~ ident ~ selector_pseudo_fn_body}
+//       selector_pseudo_fn_body = !{ "(" ~ selector ~ ")" }
+//   //TODO selector_attribute
 
-rule = { ident ~ ":" ~ color}
+// rule = { ident ~ ":" ~ color}
 
-rules = { (rule ~ ";")* ~ rule? }
-block = { selector ~ "{" ~ rules ~ "}" }
+// rules = { (rule ~ ";")* ~ rule? }
+// block = { selector ~ "{" ~ rules ~ "}" }
 
-file = { SOI ~ block* ~ EOI }
+// file = { SOI ~ block* ~ EOI }

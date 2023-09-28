@@ -1,6 +1,7 @@
-use std::fmt::Debug;
+use std::{fmt::Debug, rc::Rc, cell::RefCell};
 use partialdebug::placeholder::PartialDebug;
 use rustc_hash::{FxHashMap, FxHashSet};
+use crate::elements::ElementInterface;
 
 mod shared;
 mod errors;
@@ -13,8 +14,6 @@ pub trait InnerHtml {
   fn inner_html(&self) -> String;
 }
 
-pub trait ElementInterface {}
-
 /// Do not change values in this struct directly
 #[derive(Debug, Default)]
 pub struct ElementNodeCache {
@@ -24,7 +23,7 @@ pub struct ElementNodeCache {
 
 #[derive(Default, PartialDebug)]
 pub struct ElementNode {
-  pub element: Option<Box<dyn ElementInterface>>,
+  pub element: Option<Rc<RefCell<dyn ElementInterface>>>,
   pub tag_name: String,
   pub attributes: FxHashMap<String, String>,
   pub cache: ElementNodeCache,
@@ -40,12 +39,12 @@ impl ElementNode {
   pub fn new_with_tag(tag: String) -> Self {
     let mut this = Self::new();
     this.set_tag(tag);
+
     this
   }
 
   pub fn new_with_tag_and_attributes(tag: String, attributes: FxHashMap<String, String>) -> Self {
-    let mut this = Self::new();
-    this.set_tag(tag);
+    let mut this = Self::new_with_tag(tag);
     //XXX: should process_attribute_change be called after setting this.attributes? (requires clone)
     for (k, v) in &attributes {
       this.process_attribute_change(k, Some(v), None);
